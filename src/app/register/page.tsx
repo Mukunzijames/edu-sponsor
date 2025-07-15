@@ -5,19 +5,168 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
+import { useMutation } from '@tanstack/react-query';
+import { authService } from '@/services/authService';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Register() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [fullName, setFullName] = useState('');
+  const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    fullName: '',
+    age: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: ''
+  });
+
+  // React Query mutation for registration
+  const registerMutation = useMutation({
+    mutationFn: authService.register,
+    onSuccess: (data) => {
+      console.log('Registration successful:', data);
+      // Show success toast
+      toast({
+        title: "Registration Successful",
+        description: "Your account has been created successfully. Please log in.",
+        variant: "success",
+      });
+      // Redirect to login page after successful registration
+      router.push('/login');
+    },
+    onError: (error: any) => {
+      console.error('Registration failed:', error);
+      // Handle API errors
+      if (error.response?.data?.errors) {
+        const apiErrors = error.response.data.errors;
+        setErrors(prev => ({
+          ...prev,
+          ...apiErrors
+        }));
+        
+        toast({
+          title: "Registration Failed",
+          description: "Please check the form for errors.",
+          variant: "destructive",
+        });
+      } else if (error.response?.data?.message) {
+        // Show general error message
+        toast({
+          title: "Registration Failed",
+          description: error.response.data.message,
+          variant: "destructive",
+        });
+      } else {
+        // Show generic error
+        toast({
+          title: "Registration Failed",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      }
+    }
+  });
+
+  const validateField = (name: string, value: string) => {
+    let errorMessage = '';
+    
+    switch (name) {
+      case 'fullName':
+        errorMessage = value.trim() === '' ? 'Name is required' : '';
+        break;
+      case 'age':
+        errorMessage = value.trim() === '' ? 'Age is required' : '';
+        break;
+      case 'email':
+        errorMessage = value.trim() === '' 
+          ? 'Email is required' 
+          : !/\S+@\S+\.\S+/.test(value) 
+            ? 'Email is invalid' 
+            : '';
+        break;
+      case 'password':
+        errorMessage = value.trim() === '' 
+          ? 'Password is required' 
+          : value.length < 8 
+            ? 'Password must be at least 8 characters' 
+            : '';
+        break;
+      case 'confirmPassword':
+        errorMessage = value !== password ? 'Passwords do not match' : '';
+        break;
+      case 'role':
+        errorMessage = value.trim() === '' ? 'Please select a role' : '';
+        break;
+    }
+    
+    setErrors(prev => ({
+      ...prev,
+      [name]: errorMessage
+    }));
+    
+    return errorMessage === '';
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    
+    // Update state based on input id
+    switch (id) {
+      case 'fullName':
+        setFullName(value);
+        break;
+      case 'age':
+        setAge(value);
+        break;
+      case 'email':
+        setEmail(value);
+        break;
+      case 'password':
+        setPassword(value);
+        break;
+      case 'confirmPassword':
+        setConfirmPassword(value);
+        break;
+      case 'role':
+        setRole(value);
+        break;
+    }
+    
+    // Validate on keyup
+    validateField(id, value);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log('Registration attempt with:', { fullName, email, password });
+    
+    // Validate all fields before submission
+    const isNameValid = validateField('fullName', fullName);
+    const isAgeValid = validateField('age', age);
+    const isEmailValid = validateField('email', email);
+    const isPasswordValid = validateField('password', password);
+    const isConfirmPasswordValid = validateField('confirmPassword', confirmPassword);
+    const isRoleValid = validateField('role', role);
+    
+    // Submit if all validations pass
+    if (isNameValid && isAgeValid && isEmailValid && isPasswordValid && isConfirmPasswordValid && isRoleValid) {
+      registerMutation.mutate({
+        name: fullName,
+        age,
+        email,
+        password,
+        role
+      });
+    }
   };
 
   return (
@@ -55,12 +204,43 @@ export default function Register() {
                 <input
                   type="text"
                   id="fullName"
-                  placeholder="username@edustation.com"
+                  placeholder="Enter your full name"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   required
                 />
+                {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                <input
+                  type="text"
+                  id="age"
+                  placeholder="Enter your age"
+                  value={age}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${errors.age ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                />
+                {errors.age && <p className="mt-1 text-xs text-red-500">{errors.age}</p>}
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Register as</label>
+                <select
+                  id="role"
+                  value={role}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${errors.role ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                >
+                  <option value="">Select a role</option>
+                  <option value="School">School</option>
+                  <option value="Sponsor">Sponsor</option>
+                </select>
+                {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role}</p>}
               </div>
 
               <div className="mb-4">
@@ -70,10 +250,11 @@ export default function Register() {
                   id="email"
                   placeholder="username@edustation.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   required
                 />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
 
               <div className="mb-4">
@@ -84,8 +265,8 @@ export default function Register() {
                     id="password"
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     required
                   />
                   <button 
@@ -96,6 +277,7 @@ export default function Register() {
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
+                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
               </div>
 
               <div className="mb-4">
@@ -106,8 +288,8 @@ export default function Register() {
                     id="confirmPassword"
                     placeholder="••••••••"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     required
                   />
                   <button 
@@ -118,12 +300,14 @@ export default function Register() {
                     {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
+                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
 
                 <button 
                   type="submit" 
-                  className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition duration-200 mt-4"
+                  disabled={registerMutation.isPending}
+                  className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition duration-200 mt-4 disabled:bg-gray-400"
                 >
-                  Sign Up
+                  {registerMutation.isPending ? "Signing Up..." : "Sign Up"}
                 </button>
 
                 <div className="flex items-center my-4">

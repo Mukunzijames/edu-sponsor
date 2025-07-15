@@ -5,16 +5,119 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
+import { useMutation } from '@tanstack/react-query';
+import { authService } from '@/services/authService';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    email: '',
+    password: ''
+  });
+
+  // React Query mutation for login
+  const loginMutation = useMutation({
+    mutationFn: authService.login,
+    onSuccess: (data) => {
+      console.log('Login successful:', data);
+      // Show success toast
+      toast({
+        title: "Login Successful",
+        description: `Welcome back`,
+        variant: "success",
+      });
+      // Redirect to dashboard after successful login
+      router.push('/dashboard');
+    },
+    onError: (error: any) => {
+      console.error('Login failed:', error);
+      // Handle API errors
+      if (error.response?.data?.message) {
+        setErrors({
+          email: '',
+          password: error.response.data.message
+        });
+        
+        toast({
+          title: "Login Failed",
+          description: error.response.data.message,
+          variant: "destructive",
+        });
+      } else if (error.message === 'Network Error') {
+        toast({
+          title: "Network Error",
+          description: "Please check your internet connection.",
+          variant: "destructive",
+        });
+      } else {
+        // Show generic error
+        toast({
+          title: "Login Failed",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      }
+    }
+  });
+
+  const validateField = (name: string, value: string) => {
+    let errorMessage = '';
+    
+    switch (name) {
+      case 'email':
+        errorMessage = value.trim() === '' 
+          ? 'Email is required' 
+          : !/\S+@\S+\.\S+/.test(value) 
+            ? 'Email is invalid' 
+            : '';
+        break;
+      case 'password':
+        errorMessage = value.trim() === '' ? 'Password is required' : '';
+        break;
+    }
+    
+    setErrors(prev => ({
+      ...prev,
+      [name]: errorMessage
+    }));
+    
+    return errorMessage === '';
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    
+    // Update state based on input id
+    if (id === 'email') {
+      setEmail(value);
+    } else if (id === 'password') {
+      setPassword(value);
+    }
+    
+    // Validate on keyup
+    validateField(id, value);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt with:', { email, password });
+    
+    // Validate all fields before submission
+    const isEmailValid = validateField('email', email);
+    const isPasswordValid = validateField('password', password);
+    
+    // Submit if all validations pass
+    if (isEmailValid && isPasswordValid) {
+      loginMutation.mutate({
+        email,
+        password
+      });
+    }
   };
 
   return (
@@ -42,10 +145,11 @@ export default function Login() {
                   id="email"
                   placeholder="name@edustation.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   required
                 />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
 
               <div className="mb-4">
@@ -55,8 +159,8 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     id="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     required
                   />
                   <button 
@@ -67,6 +171,7 @@ export default function Login() {
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
+                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
                 <div className="flex justify-end mt-1">
                   <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">Forgot Password?</Link>
                 </div>
@@ -74,9 +179,10 @@ export default function Login() {
 
               <button 
                 type="submit" 
-                className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition duration-200 mt-4"
+                disabled={loginMutation.isPending}
+                className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition duration-200 mt-4 disabled:bg-gray-400"
               >
-                Log In
+                {loginMutation.isPending ? "Logging In..." : "Log In"}
               </button>
 
               <div className="flex items-center my-4">
@@ -95,7 +201,7 @@ export default function Login() {
 
               <div className="text-center mt-6">
                 <span className="text-sm text-gray-600">Don't have an account? </span>
-                <Link href="/signup" className="text-sm text-blue-600 hover:underline">Sign Up</Link>
+                <Link href="/register" className="text-sm text-blue-600 hover:underline">Sign Up</Link>
               </div>
             </form>
           </div>
