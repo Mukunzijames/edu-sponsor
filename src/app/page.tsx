@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CallToAction from "@/components/CallToAction";
@@ -36,12 +37,6 @@ export default function Home() {
       <section className="bg-indigo-600 text-white">
         <div className="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center justify-between">
           <div className="md:w-1/2 mb-10 md:mb-0">
-            <div className="flex items-center mb-6">
-              <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center mr-2">
-                <span className="text-sm font-bold">e</span>
-              </div>
-              <span className="font-semibold">eduSponsor</span>
-            </div>
             
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Sponsor a <br />Future.<br />
@@ -54,9 +49,11 @@ export default function Home() {
               communication system.
             </p>
             
-            <Button className="bg-white text-indigo-600 hover:bg-gray-100">
-              Get Started
-            </Button>
+            <Link href="/register">
+              <Button className="bg-white text-indigo-600 hover:bg-gray-100">
+                Get Started
+              </Button>
+            </Link>
           </div>
           
           <div className="md:w-1/2">
