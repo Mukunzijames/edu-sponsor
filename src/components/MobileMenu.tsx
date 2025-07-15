@@ -75,9 +75,11 @@ export default function MobileMenu() {
             >
               Contact
             </Link>
-            <Button className="bg-white text-indigo-600 hover:bg-gray-100 w-full">
-              Get Started
-            </Button>
+            <Link href="/register" onClick={toggleMenu}>
+              <Button className="bg-white text-indigo-600 hover:bg-gray-100 w-full">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
       )}

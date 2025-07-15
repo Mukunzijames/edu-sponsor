@@ -24,9 +24,11 @@ export default function Header() {
           </nav>
           
           <div className="hidden md:block">
-            <Button className="bg-white text-indigo-600 hover:bg-gray-100">
-              Get Started
-            </Button>
+            <Link href="/register">
+              <Button className="bg-white text-indigo-600 hover:bg-gray-100">
+                Get Started
+              </Button>
+            </Link>
           </div>
           
           <MobileMenu />
