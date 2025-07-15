@@ -35,18 +35,15 @@ export default function Register() {
     mutationFn: authService.register,
     onSuccess: (data) => {
       console.log('Registration successful:', data);
-      // Show success toast
       toast({
         title: "Registration Successful",
         description: "Your account has been created successfully. Please log in.",
         variant: "success",
       });
-      // Redirect to login page after successful registration
       router.push('/login');
     },
     onError: (error: any) => {
       console.error('Registration failed:', error);
-      // Handle API errors
       if (error.response?.data?.errors) {
         const apiErrors = error.response.data.errors;
         setErrors(prev => ({
@@ -60,14 +57,12 @@ export default function Register() {
           variant: "destructive",
         });
       } else if (error.response?.data?.message) {
-        // Show general error message
         toast({
           title: "Registration Failed",
           description: error.response.data.message,
           variant: "destructive",
         });
       } else {
-        // Show generic error
         toast({
           title: "Registration Failed",
           description: "Please try again later.",
@@ -120,7 +115,6 @@ export default function Register() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     
-    // Update state based on input id
     switch (id) {
       case 'fullName':
         setFullName(value);
@@ -142,14 +136,12 @@ export default function Register() {
         break;
     }
     
-    // Validate on keyup
     validateField(id, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate all fields before submission
     const isNameValid = validateField('fullName', fullName);
     const isAgeValid = validateField('age', age);
     const isEmailValid = validateField('email', email);
@@ -157,7 +149,6 @@ export default function Register() {
     const isConfirmPasswordValid = validateField('confirmPassword', confirmPassword);
     const isRoleValid = validateField('role', role);
     
-    // Submit if all validations pass
     if (isNameValid && isAgeValid && isEmailValid && isPasswordValid && isConfirmPasswordValid && isRoleValid) {
       registerMutation.mutate({
         name: fullName,
@@ -171,7 +162,7 @@ export default function Register() {
 
   return (
     <div className="flex min-h-screen w-full bg-white">
-      <div className="flex w-full h-screen">
+      <div className="flex w-full">
         {/* Left side - Image */}
         <div className="hidden md:block md:w-1/2 relative">
           <Image
@@ -184,22 +175,22 @@ export default function Register() {
         </div>
 
         {/* Right side - Registration form */}
-        <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 p-4 flex flex-col justify-center overflow-y-auto max-h-screen">
           <div className="max-w-md w-full mx-auto">
-            <div className="mb-6 flex flex-col items-center">
+            <div className="mb-4 flex flex-col items-center">
               <Image 
                 src="/Logo Concept 1.svg" 
                 alt="EduSponsor Logo" 
-                width={120} 
-                height={30} 
-                className="mb-4"
+                width={100} 
+                height={25} 
+                className="mb-2"
               />
-              <h1 className="text-2xl font-bold">Create Account</h1>
-              <p className="text-sm text-gray-600 mt-1">Sign up to join the mission of empowering students' futures</p>
+              <h1 className="text-xl font-bold">Create Account</h1>
+              <p className="text-xs text-gray-600 mt-1">Sign up to join the mission of empowering students' futures</p>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
                 <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <input
                   type="text"
@@ -207,13 +198,13 @@ export default function Register() {
                   placeholder="Enter your full name"
                   value={fullName}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full px-3 py-1.5 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   required
                 />
                 {errors.fullName && <p className="mt-1 text-xs text-red-500">{errors.fullName}</p>}
               </div>
 
-              <div className="mb-4">
+              <div>
                 <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">Age</label>
                 <input
                   type="text"
@@ -221,19 +212,19 @@ export default function Register() {
                   placeholder="Enter your age"
                   value={age}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${errors.age ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full px-3 py-1.5 border ${errors.age ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   required
                 />
                 {errors.age && <p className="mt-1 text-xs text-red-500">{errors.age}</p>}
               </div>
 
-              <div className="mb-4">
+              <div>
                 <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Register as</label>
                 <select
                   id="role"
                   value={role}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${errors.role ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full px-3 py-1.5 border ${errors.role ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   required
                 >
                   <option value="">Select a role</option>
@@ -243,7 +234,7 @@ export default function Register() {
                 {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role}</p>}
               </div>
 
-              <div className="mb-4">
+              <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                 <input
                   type="email"
@@ -251,13 +242,13 @@ export default function Register() {
                   placeholder="username@edustation.com"
                   value={email}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full px-3 py-1.5 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   required
                 />
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
 
-              <div className="mb-4">
+              <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <div className="relative">
                   <input
@@ -266,7 +257,7 @@ export default function Register() {
                     placeholder="••••••••"
                     value={password}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    className={`w-full px-3 py-1.5 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     required
                   />
                   <button 
@@ -280,7 +271,7 @@ export default function Register() {
                 {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
               </div>
 
-              <div className="mb-4">
+              <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
                 <div className="relative">
                   <input
@@ -289,7 +280,7 @@ export default function Register() {
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    className={`w-full px-3 py-1.5 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     required
                   />
                   <button 
@@ -301,33 +292,33 @@ export default function Register() {
                   </button>
                 </div>
                 {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+              </div>
 
-                <button 
-                  type="submit" 
-                  disabled={registerMutation.isPending}
-                  className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition duration-200 mt-4 disabled:bg-gray-400"
-                >
-                  {registerMutation.isPending ? "Signing Up..." : "Sign Up"}
-                </button>
+              <button 
+                type="submit" 
+                disabled={registerMutation.isPending}
+                className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition duration-200 mt-3 disabled:bg-gray-400"
+              >
+                {registerMutation.isPending ? "Signing Up..." : "Sign Up"}
+              </button>
 
-                <div className="flex items-center my-4">
-                  <div className="flex-grow border-t border-gray-300"></div>
-                  <span className="px-3 text-sm text-gray-500">or continue with</span>
-                  <div className="flex-grow border-t border-gray-300"></div>
-                </div>
+              <div className="flex items-center my-2">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="px-3 text-xs text-gray-500">or continue with</span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
 
-                <button 
-                  type="button" 
-                  className="w-full flex items-center justify-center border border-gray-300 py-2 px-4 rounded-md hover:bg-gray-50 transition duration-200"
-                >
-                  <FcGoogle className="mr-2 text-xl" />
-                  Sign up with Google
-                </button>
+              <button 
+                type="button" 
+                className="w-full flex items-center justify-center border border-gray-300 py-1.5 px-4 rounded-md hover:bg-gray-50 transition duration-200"
+              >
+                <FcGoogle className="mr-2 text-lg" />
+                <span className="text-sm">Sign up with Google</span>
+              </button>
 
-                <div className="text-center mt-6">
-                  <span className="text-sm text-gray-600">Already have an account? </span>
-                  <Link href="/login" className="text-sm text-blue-600 hover:underline">Log in</Link>
-                </div>
+              <div className="text-center mt-4">
+                <span className="text-xs text-gray-600">Already have an account? </span>
+                <Link href="/login" className="text-xs text-blue-600 hover:underline">Log in</Link>
               </div>
             </form>
           </div>
@@ -336,4 +327,3 @@ export default function Register() {
     </div>
   );
 }
-
