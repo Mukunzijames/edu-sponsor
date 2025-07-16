@@ -1,191 +1,217 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import { Search } from "lucide-react"
+import { useSearchParams } from 'next/navigation'
+import { useStudentsBySchool } from '@/hooks/useStudents'
+import { useSchool } from '@/hooks/useSchools'
 
-function SchoolsPage() {
+export default function StudentsPage() {
+  const searchParams = useSearchParams()
+  const schoolId = searchParams.get('schoolId')
+  
   const [currentPage, setCurrentPage] = useState(1)
   const [sortBy, setSortBy] = useState('Newest')
+  const [searchQuery, setSearchQuery] = useState('')
   
-  // Mock data for schools
-  const schools = Array.from({ length: 185 }, (_, i) => ({
-    id: i + 1,
-    name: 'Utunyoni Primary School',
-    description: 'Needs support for Senior 5 science fees. Passionate about engineering.',
-    image: null // Placeholder for school image
-  }))
+  // Fetch students data using React Query
+  const { 
+    data: students = [], 
+    isLoading: isLoadingStudents, 
+    error: studentsError 
+  } = useStudentsBySchool(schoolId)
+  
+  // Fetch school data to display school name
+  const { 
+    data: school, 
+    isLoading: isLoadingSchool 
+  } = useSchool(schoolId || '')
+  
+  // Filter students based on search query
+  const filteredStudents = students.filter(student => 
+    student.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.Email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.ParentName.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+  
+  // Sort students based on selected option
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+    if (sortBy === 'Newest') {
+      return new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime()
+    } else if (sortBy === 'Oldest') {
+      return new Date(a.CreatedAt).getTime() - new Date(b.CreatedAt).getTime()
+    } else if (sortBy === 'Name') {
+      return a.Name.localeCompare(b.Name)
+    } else if (sortBy === 'Age') {
+      return parseInt(a.Age) - parseInt(b.Age)
+    }
+    return 0
+  })
 
   const itemsPerPage = 8
-  const totalPages = Math.ceil(schools.length / itemsPerPage)
+  const totalPages = Math.ceil(sortedStudents.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const currentSchools = schools.slice(startIndex, startIndex + itemsPerPage)
+  const currentStudents = sortedStudents.slice(startIndex, startIndex + itemsPerPage)
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
   }
 
-  const renderPaginationButtons = () => {
-    const buttons = []
-    const maxVisiblePages = 5
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-
-    // Adjust startPage if we're near the end
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1)
-    }
-
-    // Previous button
-    buttons.push(
-      <button
-        key="prev"
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="px-3 py-2 mx-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+  if (isLoadingStudents || isLoadingSchool) {
+    return (
+      <div className="container mx-auto p-6 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
     )
+  }
 
-    // Page numbers
-    for (let i = startPage; i <= endPage; i++) {
-      buttons.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`px-3 py-2 mx-1 rounded ${
-            i === currentPage
-              ? 'bg-blue-500 text-white'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          {i}
-        </button>
-      )
-    }
-
-    // Show ellipsis and last page if needed
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        buttons.push(
-          <span key="ellipsis" className="px-3 py-2 mx-1 text-gray-500">
-            ...
-          </span>
-        )
-      }
-      buttons.push(
-        <button
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-          className="px-3 py-2 mx-1 text-gray-600 hover:bg-gray-100 rounded"
-        >
-          {totalPages}
-        </button>
-      )
-    }
-
-    // Next button
-    buttons.push(
-      <button
-        key="next"
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-3 py-2 mx-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+  if (studentsError) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{(studentsError as Error).message}</span>
+        </div>
+      </div>
     )
-
-    return buttons
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Schools</h1>
-        <div className="flex items-center space-x-4">
-          <button className="text-blue-600 hover:text-blue-800 font-medium">
-            View All →
-          </button>
+    <div className="container mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-2">
+            {school ? `Students at ${school.Name}` : 'All Students'}
+          </h1>
+          <p className="text-sm text-gray-500">
+            {school?.District && `${school.District} district`}
+          </p>
         </div>
-      </div>
 
-      {/* Sort and Search */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <div className="absolute left-3 top-2.5 text-gray-400">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+        <div className="flex justify-between items-center mb-6">
+          <div className="relative w-72">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search"
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Sort by:</span>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Newest">Newest</SelectItem>
+                <SelectItem value="Oldest">Oldest</SelectItem>
+                <SelectItem value="Name">Name</SelectItem>
+                <SelectItem value="Age">Age</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Sort by:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="Newest">Newest</option>
-            <option value="Oldest">Oldest</option>
-            <option value="Name">Name</option>
-          </select>
-        </div>
-      </div>
 
-      {/* School Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {currentSchools.map((school, index) => (
-          <div key={school.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-            {/* School Image Placeholder */}
-            <div className="h-48 bg-gray-200 relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-gray-400 text-4xl">🏫</div>
-              </div>
-              {/* Bookmark icon */}
-              <div className="absolute top-3 right-3">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-400 hover:text-blue-500 cursor-pointer">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </div>
-            </div>
-            
-            {/* School Info */}
-            <div className="p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">{school.name}</h3>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{school.description}</p>
-              
-              {/* Donate Button */}
-              <button className="w-full py-2 px-4 rounded-lg font-medium transition-colors duration-200 bg-blue-600 text-white hover:bg-blue-700">
-                Donate
-              </button>
-            </div>
+        {currentStudents.length === 0 ? (
+          <div className="text-center py-10 text-gray-500">
+            No students found
           </div>
-        ))}
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-center items-center space-x-2">
-        <div className="flex items-center">
-          {renderPaginationButtons()}
-        </div>
-      </div>
-
-      {/* Results info */}
-      <div className="text-center text-sm text-gray-500 mt-4">
-        Showing data 1 to {Math.min(itemsPerPage, schools.length)} of {schools.length} entries
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Student Name</TableHead>
+                    <TableHead>Gender</TableHead>
+                    <TableHead>Age</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Parent Name</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {currentStudents.map((student) => (
+                    <TableRow key={student.Id}>
+                      <TableCell className="font-medium">{student.Name}</TableCell>
+                      <TableCell>{student.Gender}</TableCell>
+                      <TableCell>{student.Age}</TableCell>
+                      <TableCell>{student.Email}</TableCell>
+                      <TableCell>{student.ParentName}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-6 flex justify-between items-center">
+              <div className="text-sm text-gray-500">
+                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, sortedStudents.length)} of {sortedStudents.length} entries
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(pageNum)}
+                          isActive={currentPage === pageNum}
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  {totalPages > 3 && <PaginationEllipsis />}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
-}
+}   
 
-export default SchoolsPage
