@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import DashboardHeader from "@/components/dashboard/Header";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface SidebarLinkProps {
   href: string;
@@ -55,6 +56,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const { isCollapsed, toggleSidebar } = useSidebarState();
+  const { user } = useAuth();
+  const userRole = user?.role || "";
+  const isSponsor = userRole === "Sponsor";
 
   return (
     <div className="flex h-screen">
@@ -86,29 +90,27 @@ export default function DashboardLayout({
             isCollapsed={isCollapsed} 
           />
           <SidebarLink 
-            href="/dashboard/school-admin" 
+            href="/dashboard/school" 
             icon={<School size={20} />} 
-            label="School Admin" 
+            label="School" 
             isCollapsed={isCollapsed} 
           />
-          <SidebarLink 
-            href="/dashboard/sponsor" 
-            icon={<Users size={20} />} 
-            label="Sponsor" 
-            isCollapsed={isCollapsed} 
-          />
-          <SidebarLink 
-            href="/dashboard/students" 
-            icon={<GraduationCap size={20} />} 
-            label="Students" 
-            isCollapsed={isCollapsed} 
-          />
-          <SidebarLink 
-            href="/dashboard/analytics" 
-            icon={<BarChart3 size={20} />} 
-            label="Analytics" 
-            isCollapsed={isCollapsed} 
-          />
+          {!isSponsor && (
+            <SidebarLink 
+              href="/dashboard/sponsor" 
+              icon={<Users size={20} />} 
+              label="Sponsor" 
+              isCollapsed={isCollapsed} 
+            />
+          )}
+          {!isSponsor && (
+            <SidebarLink 
+              href="/dashboard/analytics" 
+              icon={<BarChart3 size={20} />} 
+              label="Analytics" 
+              isCollapsed={isCollapsed} 
+            />
+          )}
           <SidebarLink 
             href="/dashboard/payments" 
             icon={<CreditCard size={20} />} 
