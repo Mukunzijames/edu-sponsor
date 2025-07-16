@@ -95,14 +95,14 @@ export default function DashboardLayout({
             label="School" 
             isCollapsed={isCollapsed} 
           />
-          {!isSponsor && (
+          {/* {!isSponsor && (
             <SidebarLink 
               href="/dashboard/sponsor" 
               icon={<Users size={20} />} 
               label="Sponsor" 
               isCollapsed={isCollapsed} 
             />
-          )}
+          )} */}
           {!isSponsor && (
             <SidebarLink 
               href="/dashboard/analytics" 
