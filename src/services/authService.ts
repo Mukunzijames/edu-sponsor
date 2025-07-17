@@ -38,7 +38,11 @@ export const authService = {
     if (response.data.token) {
       // Set cookie to expire in 7 days
       Cookies.set('auth_token', response.data.token, { expires: 7, secure: process.env.NODE_ENV === 'production' });
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      // Only store user data if it's valid
+      if (response.data.user && typeof response.data.user === 'object') {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
     }
     
     return response.data;
@@ -48,11 +52,28 @@ export const authService = {
     Cookies.remove('auth_token');
     localStorage.removeItem("user");
   },
+
+  // Utility method to clear any corrupted data
+  clearStoredData: (): void => {
+    try {
+      Cookies.remove('auth_token');
+      localStorage.removeItem("user");
+    } catch (error) {
+      console.error("Error clearing stored data:", error);
+    }
+  },
   
   getCurrentUser: (): any => {
     const userStr = localStorage.getItem("user");
-    if (userStr) {
-      return JSON.parse(userStr);
+    if (userStr && userStr !== "undefined" && userStr !== "null") {
+      try {
+        return JSON.parse(userStr);
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        // Clear invalid data
+        localStorage.removeItem("user");
+        return null;
+      }
     }
     return null;
   },

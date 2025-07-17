@@ -34,6 +34,17 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network Error: Unable to connect to API server');
+      console.error('Error details:', error.message);
+      
+      // Create a custom error for network issues
+      const networkError = new Error('Unable to connect to server. Please check your internet connection or try again later.');
+      networkError.name = 'NetworkError';
+      return Promise.reject(networkError);
+    }
+    
     console.error('API Response Error:', error.response?.status, error.response?.data || error.message);
     
     // Handle 401 Unauthorized errors

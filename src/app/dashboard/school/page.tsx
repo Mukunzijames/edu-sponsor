@@ -14,9 +14,9 @@ function SchoolsPage() {
   // Fetch schools using React Query
   const { data: schools = [], isLoading, error } = useSchools()
   
-  // Handle donate button click to navigate to students page
-  const handleDonateClick = (schoolId: string) => {
-    router.push(`/dashboard/student?schoolId=${schoolId}`)
+  // Handle view students button click to navigate to school students page
+  const handleViewStudents = (schoolId: string) => {
+    router.push(`/dashboard/school/${schoolId}`)
   }
   
   // Apply filtering and sorting
@@ -228,12 +228,12 @@ function SchoolsPage() {
                     </div>
                   )}
                   
-                  {/* Donate Button */}
+                  {/* View Students Button */}
                   <button 
-                    onClick={() => handleDonateClick(school.Id)}
+                    onClick={() => handleViewStudents(school.Id)}
                     className="w-full py-2 px-4 rounded-lg font-medium transition-colors duration-200 bg-blue-600 text-white hover:bg-blue-700"
                   >
-                    Donate
+                    Sponser Students
                   </button>
                 </div>
               </div>

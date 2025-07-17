@@ -30,9 +30,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
         setIsAuthenticated(false);
+        // Clear any corrupted data if user or token is missing
+        if (!currentUser || !token) {
+          authService.clearStoredData();
+        }
       }
     } catch (error) {
       console.error("Auth check error:", error);
+      // Clear any corrupted data
+      authService.clearStoredData();
       setUser(null);
       setIsAuthenticated(false);
     } finally {

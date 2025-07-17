@@ -3,6 +3,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { studentService, Student } from '../services/studentService';
 
+export function useStudents() {
+  return useQuery<Student[], Error>({
+    queryKey: ['students'],
+    queryFn: () => studentService.getAllStudents(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 1,
+    retryDelay: 1000,
+  });
+}
+
 export function useStudentsBySchool(schoolId: string | null) {
   return useQuery<Student[], Error>({
     queryKey: ['students', schoolId],
@@ -23,4 +34,4 @@ export function useStudent(id: string | null) {
     },
     enabled: !!id,
   });
-} 
+}
