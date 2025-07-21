@@ -7,9 +7,10 @@ export interface School {
   Name: string;
   Description?: string;
   District?: string;
-  Status: boolean;
+  Status?: boolean;
   CreatedAt: string;
   UpdatedAt: string;
+  
 }
 
 export const schoolService = {

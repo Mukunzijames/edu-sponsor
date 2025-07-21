@@ -2,8 +2,8 @@
 import axios from "axios";
 import Cookies from 'js-cookie';
 
-
-const API_URL = "https://edu-sponsor-api.onrender.com";
+// Use environment variable or fallback to default URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://edu-sponsor-api.onrender.com";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -38,8 +38,9 @@ api.interceptors.response.use(
     
     // Handle 401 Unauthorized errors
     if (error.response && error.response.status === 401) {
+      // Clear all auth-related cookies
       Cookies.remove('auth_token');
-      localStorage.removeItem('user');
+      Cookies.remove('user_data');
       
       // Only redirect if we're in the browser
       if (typeof window !== 'undefined') {

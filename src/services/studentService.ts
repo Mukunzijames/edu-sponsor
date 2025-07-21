@@ -10,6 +10,24 @@ export interface Student {
   Address: string;
   Phone: string;
   Email: string;
+  Status: string;
+  Avatar: string;
+  ParentName: string;
+  SchoolId: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+export interface selectedStudent {
+  Id: string;
+  Name: string;
+  Age: string;
+  Gender: string;
+  Address: string;
+  Phone: string;
+  Email: string;
+  Status: string;
+  Avatar: string;
   ParentName: string;
   SchoolId: string;
   CreatedAt: string;

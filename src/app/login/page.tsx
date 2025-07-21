@@ -8,11 +8,10 @@ import { FcGoogle } from 'react-icons/fc';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export default function Login() {
   const router = useRouter();
-  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,10 +26,8 @@ export default function Login() {
     onSuccess: (data) => {
       console.log('Login successful:', data);
       // Show success toast
-      toast({
-        title: "Login Successful",
-        description: `Welcome back`,
-        variant: "success",
+      toast.success("Login Successful", {
+        description: `Welcome back`
       });
       // Redirect to dashboard after successful login
       router.push('/dashboard');
@@ -44,23 +41,17 @@ export default function Login() {
           password: error.response.data.message
         });
         
-        toast({
-          title: "Login Failed",
-          description: error.response.data.message,
-          variant: "destructive",
+        toast.error("Login Failed", {
+          description: error.response.data.message
         });
       } else if (error.message === 'Network Error') {
-        toast({
-          title: "Network Error",
-          description: "Please check your internet connection.",
-          variant: "destructive",
+        toast.error("Network Error", {
+          description: "Please check your internet connection."
         });
       } else {
         // Show generic error
-        toast({
-          title: "Login Failed",
-          description: "Please try again later.",
-          variant: "destructive",
+        toast.error("Login Failed", {
+          description: "Please try again later."
         });
       }
     }

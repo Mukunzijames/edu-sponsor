@@ -22,6 +22,7 @@ interface AuthResponse {
     id: string;
     name: string;
     email: string;
+    role?: string;
   };
 }
 
@@ -34,11 +35,11 @@ export const authService = {
   login: async (data: LoginData): Promise<AuthResponse> => {
     const response = await api.post(`/api/auth/login`, data);
     
-    // Store token in cookie
+    // Store token and user data in cookies
     if (response.data.token) {
-      // Set cookie to expire in 7 days
+      // Set cookies to expire in 7 days
       Cookies.set('auth_token', response.data.token, { expires: 7, secure: process.env.NODE_ENV === 'production' });
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      Cookies.set('user_data', JSON.stringify(response.data.user), { expires: 7, secure: process.env.NODE_ENV === 'production' });
     }
     
     return response.data;
@@ -46,13 +47,18 @@ export const authService = {
   
   logout: (): void => {
     Cookies.remove('auth_token');
-    localStorage.removeItem("user");
+    Cookies.remove('user_data');
   },
   
   getCurrentUser: (): any => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      return JSON.parse(userStr);
+    const userData = Cookies.get('user_data');
+    if (userData) {
+      try {
+        return JSON.parse(userData);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        return null;
+      }
     }
     return null;
   },

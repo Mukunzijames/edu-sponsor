@@ -8,11 +8,10 @@ import { FcGoogle } from 'react-icons/fc';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export default function Register() {
   const router = useRouter();
-  const { toast } = useToast();
   const [fullName, setFullName] = useState('');
   const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
@@ -35,10 +34,8 @@ export default function Register() {
     mutationFn: authService.register,
     onSuccess: (data) => {
       console.log('Registration successful:', data);
-      toast({
-        title: "Registration Successful",
-        description: "Your account has been created successfully. Please log in.",
-        variant: "success",
+      toast.success("Registration Successful", {
+        description: "Your account has been created successfully. Please log in."
       });
       router.push('/login');
     },
@@ -51,22 +48,16 @@ export default function Register() {
           ...apiErrors
         }));
         
-        toast({
-          title: "Registration Failed",
-          description: "Please check the form for errors.",
-          variant: "destructive",
+        toast.error("Registration Failed", {
+          description: "Please check the form for errors."
         });
       } else if (error.response?.data?.message) {
-        toast({
-          title: "Registration Failed",
-          description: error.response.data.message,
-          variant: "destructive",
+        toast.error("Registration Failed", {
+          description: error.response.data.message
         });
       } else {
-        toast({
-          title: "Registration Failed",
-          description: "Please try again later.",
-          variant: "destructive",
+        toast.error("Registration Failed", {
+          description: "Please try again later."
         });
       }
     }
