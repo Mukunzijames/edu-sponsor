@@ -27,7 +27,7 @@ import {
   Loader2,
   DollarSign
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { useStudent } from "@/hooks/useStudents"
 import { useSchool } from "@/hooks/useSchools"
 import { createCheckoutSession } from "@/services/paymentService"
@@ -50,16 +50,10 @@ const formatDateTime = (dateString: string) => {
   }
 }
 
-// Define the correct params type for Next.js 14
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function StudentViewPage({ params }: { params: Promise<{ id: string }> }) {
-  // Access the ID directly from params
-  const studentId = (await params).id;
+export default function StudentViewPage() {
+  // Get the ID from the URL params
+  const params = useParams();
+  const studentId = params?.id as string;
   
   const [mounted, setMounted] = useState(false)
   const [isDonating, setIsDonating] = useState(false)
