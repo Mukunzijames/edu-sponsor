@@ -12,7 +12,7 @@ const getToken = () => Cookies.get('auth_token');
 // Create payment intent
 export const createPaymentIntent = async (studentId: string, amount: number) => {
   try {
-    const response = await fetch(`${API_URL}/payments/create-payment-intent`, {
+    const response = await fetch(`${API_URL}/api/create-payment-intent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const createPaymentIntent = async (studentId: string, amount: number) => 
 // Create checkout session
 export const createCheckoutSession = async (studentId: string, amount: number) => {
   try {
-    const response = await fetch(`${API_URL}/payments/create-checkout-session`, {
+    const response = await fetch(`${API_URL}/api/payments/create-checkout-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -56,9 +56,49 @@ export const createCheckoutSession = async (studentId: string, amount: number) =
 };
 
 // Get donation history
+// export const getDonations = async () => {
+//   try {
+//     const response = await fetch(`${API_URL}/donations/sponsor`, {
+//       headers: {
+//         'Authorization': `Bearer ${getToken()}`
+//       }
+//     });
+    
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! Status: ${response.status}`);
+//     }
+    
+//     return await response.json();
+//   } catch (error) {
+//     console.error('Error fetching donations:', error);
+//     throw error;
+//   }
+// }; 
+
+// get sponsorship
+export const getSPonsorship = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/sponsorships/sponsor`, {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching donations:', error);
+    throw error;
+  }
+}; 
+
+// get donations
 export const getDonations = async () => {
   try {
-    const response = await fetch(`${API_URL}/payments/donations/sponsor`, {
+    const response = await fetch(`${API_URL}/api/payments/donations/all`, {
       headers: {
         'Authorization': `Bearer ${getToken()}`
       }

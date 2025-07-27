@@ -14,7 +14,8 @@ import {
   Settings,
   HelpCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  HandCoins
 } from "lucide-react";
 import { useSidebarState } from "@/hooks/useSidebarState";
 import DashboardHeader from "@/components/dashboard/Header";
@@ -40,7 +41,7 @@ const SidebarLink = ({ href, icon, label, isCollapsed }: SidebarLinkProps) => {
     >
       <div className="min-w-[24px]">{icon}</div>
       {isCollapsed ? (
-        <div className="absolute left-12 bg-white text-gray-800 px-2 py-1 rounded-md shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+        <div className="absolute z-50 invisible px-2 py-1 text-gray-800 transition-all bg-white rounded-md shadow-md opacity-0 left-12 group-hover:opacity-100 group-hover:visible whitespace-nowrap">
           {label}
         </div>
       ) : (
@@ -70,12 +71,12 @@ export default function DashboardLayout({
       >
         {/* Logo */}
         <div className={`p-4 flex items-center ${isCollapsed ? "justify-center" : "justify-between"}`}>
-          {!isCollapsed && <span className="text-gray-800 font-bold">
+          {!isCollapsed && <span className="font-bold text-gray-800">
             <Image src="/Logo Concept white 1.svg" alt="Logo" width={140} height={140} />
             </span>}
           <button 
             onClick={toggleSidebar} 
-            className="p-1 rounded-full hover:bg-gray-100 text-gray-600"
+            className="p-1 text-gray-600 rounded-full hover:bg-gray-100"
           >
             {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
@@ -87,6 +88,12 @@ export default function DashboardLayout({
             href="/dashboard" 
             icon={<LayoutDashboard size={20} />} 
             label="Dashboard" 
+            isCollapsed={isCollapsed} 
+          />
+          <SidebarLink 
+            href="/dashboard/donations" 
+            icon={<HandCoins  size={20} />} 
+            label="Donations" 
             isCollapsed={isCollapsed} 
           />
           <SidebarLink 

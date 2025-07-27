@@ -75,6 +75,7 @@ function SchoolsPage() {
         key="prev"
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        title="Previous Page"
         className="px-3 py-2 mx-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +114,7 @@ function SchoolsPage() {
         <button
           key={totalPages}
           onClick={() => handlePageChange(totalPages)}
-          className="px-3 py-2 mx-1 text-gray-600 hover:bg-gray-100 rounded"
+          className="px-3 py-2 mx-1 text-gray-600 rounded hover:bg-gray-100"
         >
           {totalPages}
         </button>
@@ -138,26 +139,26 @@ function SchoolsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="p-6 mx-auto max-w-7xl">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Schools</h1>
         <div className="flex items-center space-x-4">
-          <button className="text-blue-600 hover:text-blue-800 font-medium">
+          <button className="font-medium text-blue-600 hover:text-blue-800">
             View All →
           </button>
         </div>
       </div>
 
       {/* Sort and Search */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center justify-between mb-6">
         <div className="relative">
           <input
             type="text"
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <div className="absolute left-3 top-2.5 text-gray-400">
             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +171,7 @@ function SchoolsPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="Newest">Newest</option>
             <option value="Oldest">Oldest</option>
@@ -181,13 +182,13 @@ function SchoolsPage() {
 
       {/* Loading and Error States */}
       {isLoading && (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="flex items-center justify-center py-20">
+          <div className="w-12 h-12 border-b-2 border-blue-500 rounded-full animate-spin"></div>
         </div>
       )}
       
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+        <div className="relative px-4 py-3 mb-6 text-red-700 border border-red-200 rounded bg-red-50" role="alert">
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{(error as Error).message}</span>
         </div>
@@ -195,18 +196,18 @@ function SchoolsPage() {
 
       {/* School Cards Grid */}
       {!isLoading && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
           {currentSchools.length > 0 ? (
             currentSchools.map((school) => (
-              <div key={school.Id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <div key={school.Id} className="overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md hover:shadow-lg">
                 {/* School Image Placeholder */}
-                <div className="h-48 bg-gray-200 relative">
+                <div className="relative h-48 bg-gray-200">
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-gray-400 text-4xl">🏫</div>
+                    <div className="text-4xl text-gray-400">🏫</div>
                   </div>
                   {/* Bookmark icon */}
                   <div className="absolute top-3 right-3">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-400 hover:text-blue-500 cursor-pointer">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-400 cursor-pointer hover:text-blue-500">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   </div>
@@ -214,12 +215,12 @@ function SchoolsPage() {
                 
                 {/* School Info */}
                 <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2">{school.Name}</h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{school.Description || 'No description available'}</p>
+                  <h3 className="mb-2 font-semibold text-gray-900">{school.Name}</h3>
+                  <p className="mb-4 text-sm text-gray-600 line-clamp-2">{school.Description || 'No description available'}</p>
                   
                   {/* District if available */}
                   {school.District && (
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <div className="flex items-center mb-4 text-sm text-gray-500">
                       <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -231,7 +232,7 @@ function SchoolsPage() {
                   {/* Donate Button */}
                   <button 
                     onClick={() => handleDonateClick(school.Id)}
-                    className="w-full py-2 px-4 rounded-lg font-medium transition-colors duration-200 bg-blue-600 text-white hover:bg-blue-700"
+                    className="w-full px-4 py-2 font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
                   >
                     Donate
                   </button>
@@ -239,7 +240,7 @@ function SchoolsPage() {
               </div>
             ))
           ) : (
-            <div className="col-span-4 text-center py-10 text-gray-500">
+            <div className="col-span-4 py-10 text-center text-gray-500">
               No schools found
             </div>
           )}
@@ -249,14 +250,14 @@ function SchoolsPage() {
       {/* Pagination */}
       {!isLoading && !error && filteredSchools.length > 0 && (
         <>
-          <div className="flex justify-center items-center space-x-2">
+          <div className="flex items-center justify-center space-x-2">
             <div className="flex items-center">
               {renderPaginationButtons()}
             </div>
           </div>
 
           {/* Results info */}
-          <div className="text-center text-sm text-gray-500 mt-4">
+          <div className="mt-4 text-sm text-center text-gray-500">
             Showing {filteredSchools.length > 0 ? startIndex + 1 : 0} to {Math.min(startIndex + itemsPerPage, filteredSchools.length)} of {filteredSchools.length} entries
           </div>
         </>
