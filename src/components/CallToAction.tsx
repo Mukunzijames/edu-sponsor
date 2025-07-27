@@ -7,7 +7,8 @@ interface CallToActionProps {
   buttonText: string;
   className?: string;
 }
-
+// CallToAction component
+// This component displays a call to action section with a title, description, and button
 export default function CallToAction({
   title,
   description,

@@ -15,7 +15,8 @@ interface FaqItem {
 interface FaqAccordionProps {
   items: FaqItem[];
 }
-
+// Accordion component for FAQs
+// This component displays a list of FAQs in an accordion format
 export default function FaqAccordion({ items }: FaqAccordionProps) {
   return (
     <Accordion type="single" collapsible className="w-full">
