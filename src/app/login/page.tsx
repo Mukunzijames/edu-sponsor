@@ -56,7 +56,8 @@ export default function Login() {
       }
     }
   });
-
+// Field Validation function
+  // Validates individual fields and updates error state
   const validateField = (name: string, value: string) => {
     let errorMessage = '';
     
