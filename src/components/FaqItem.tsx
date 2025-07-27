@@ -5,7 +5,8 @@ interface FaqItemProps {
   answer?: string;
   icon?: ReactNode;
 }
-
+// FaqItem component
+// This component displays a single FAQ item with an optional icon
 export default function FaqItem({ question, answer, icon }: FaqItemProps) {
   return (
     <div className="mb-6">

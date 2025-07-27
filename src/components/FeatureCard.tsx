@@ -8,7 +8,8 @@ interface FeatureCardProps {
   iconBgColor?: string;
   iconColor?: string;
 }
-
+// FeatureCard component
+// This component displays a feature card with an icon, title, and description
 export default function FeatureCard({
   title,
   description,
