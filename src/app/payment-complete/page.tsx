@@ -32,7 +32,8 @@ interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<
 function Badge({ className, variant, ...props }: BadgeProps) {
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />
 }
-
+// Payment successful page component
+// This page displays a success message after a payment is completed
 export default function PaymentSuccessPage() {
   const [mounted, setMounted] = useState(false)
   const [paymentId, setPaymentId] = useState("")
