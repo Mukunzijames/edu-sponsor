@@ -54,7 +54,8 @@ interface DonationResponse {
   message: string
   data: Donation[]
 }
-
+// State management for donations
+// This component fetches and displays donations with search and pagination features
 export default function DonationsPage() {
   const [donations, setDonations] = useState<Donation[]>([])
   const [filteredDonations, setFilteredDonations] = useState<Donation[]>([])
@@ -114,7 +115,8 @@ export default function DonationsPage() {
       minute: "2-digit",
     })
   }
-
+// Format currency function
+// This function formats a given amount string into a currency format
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -134,7 +136,8 @@ export default function DonationsPage() {
   const getUniqueStudents = () => {
     return new Set(donations.map((d) => d.Sponsorship.StudentId)).size
   }
-
+// Pagination logic
+// This logic calculates the total number of items, pages, and current page items
   const totalItems = filteredDonations.length
   const totalPages = Math.ceil(totalItems / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
