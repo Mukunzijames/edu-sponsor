@@ -37,9 +37,14 @@ export const authService = {
     
     // Store token and user data in cookies
     if (response.data.token) {
+      console.log('Received auth token:', response.data.token);
+      console.log('Received user data:', response.data.userdata);
       // Set cookies to expire in 7 days
       Cookies.set('auth_token', response.data.token, { expires: 7, secure: process.env.NODE_ENV === 'production' });
-      Cookies.set('user_data', JSON.stringify(response.data.user), { expires: 7, secure: process.env.NODE_ENV === 'production' });
+      console.log('Auth token set in cookies:', response.data.token);
+      Cookies.set('user_data', JSON.stringify(response.data.userdata), { expires: 7, secure: process.env.NODE_ENV === 'production' });
+      console.log('User data set in cookies:', response.data.userdata);
+      
     }
     
     return response.data;

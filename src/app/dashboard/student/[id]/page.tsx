@@ -32,6 +32,7 @@ import { useStudent } from "@/hooks/useStudents"
 import { useSchool } from "@/hooks/useSchools"
 import { createCheckoutSession } from "@/services/paymentService"
 
+
 // Helper function to format date and time
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString)
@@ -118,10 +119,10 @@ export default function StudentViewPage() {
   
   if (studentLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
-          <p className="text-indigo-600 font-medium">Loading student information...</p>
+          <p className="font-medium text-indigo-600">Loading student information...</p>
         </div>
       </div>
     )
@@ -129,10 +130,10 @@ export default function StudentViewPage() {
   
   if (studentError || !student) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center max-w-md p-6 bg-red-50 rounded-lg border border-red-100">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Student</h2>
-          <p className="text-gray-600 mb-4">
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="max-w-md p-6 text-center border border-red-100 rounded-lg bg-red-50">
+          <h2 className="mb-2 text-xl font-bold text-red-600">Error Loading Student</h2>
+          <p className="mb-4 text-gray-600">
             We couldn't load the student information. Please try again later or contact support.
           </p>
           <Button onClick={() => router.back()} variant="outline">
@@ -150,8 +151,8 @@ export default function StudentViewPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100">
-        <div className="max-w-6xl mx-auto p-6">
+      <div className="border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+        <div className="max-w-6xl p-6 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -168,19 +169,19 @@ export default function StudentViewPage() {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Students
               </Button>
-              <div className="h-6 w-px bg-gray-300" />
+              <div className="w-px h-6 bg-gray-300" />
               <h1 className="text-2xl font-bold text-indigo-600">Student Profile</h1>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="border-gray-200 bg-transparent">
+              <Button variant="outline" size="sm" className="bg-transparent border-gray-200">
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" className="border-gray-200 bg-transparent">
+              <Button variant="outline" size="sm" className="bg-transparent border-gray-200">
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button variant="outline" size="sm" className="border-gray-200 bg-transparent">
+              <Button variant="outline" size="sm" className="bg-transparent border-gray-200">
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </Button>
@@ -189,7 +190,7 @@ export default function StudentViewPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <div className="max-w-6xl p-6 mx-auto space-y-8">
         {/* Student Header Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -198,24 +199,24 @@ export default function StudentViewPage() {
         >
           <Card className="border-gray-100 shadow-lg">
             <CardContent className="p-8">
-              <div className="flex flex-col lg:flex-row gap-8 items-start">
+              <div className="flex flex-col items-start gap-8 lg:flex-row">
                 {/* Avatar and Basic Info */}
                 <div className="flex flex-col items-center text-center lg:text-left lg:items-start">
                   <Avatar className="w-32 h-32 mb-4 border-4 border-indigo-100">
                     <AvatarImage src={student.Avatar || "/placeholder.svg?height=128&width=128"} alt={student.Name} />
-                    <AvatarFallback className="bg-indigo-100 text-indigo-600 text-3xl font-bold">
+                    <AvatarFallback className="text-3xl font-bold text-indigo-600 bg-indigo-100">
                       {student.Name.split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </AvatarFallback>
                   </Avatar>
-                  <h2 className="text-3xl font-bold text-indigo-600 mb-2">{student.Name}</h2>
-                  <p className="text-gray-600 mb-4">{school?.Name || "Loading school..."}</p>
-                  <Badge className="bg-green-100 text-green-700 border-green-200 mb-6">{student.Status || "Active Student"}</Badge>
+                  <h2 className="mb-2 text-3xl font-bold text-indigo-600">{student.Name}</h2>
+                  <p className="mb-4 text-gray-600">{school?.Name || "Loading school..."}</p>
+                  <Badge className="mb-6 text-green-700 bg-green-100 border-green-200">{student.Status || "Active Student"}</Badge>
                 </div>
 
                 {/* Student Details Grid */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid flex-1 grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-indigo-100 rounded-full">
@@ -277,7 +278,7 @@ export default function StudentViewPage() {
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">School ID</p>
-                        <p className="font-semibold text-gray-900 font-mono text-sm">
+                        <p className="font-mono text-sm font-semibold text-gray-900">
                           {student.SchoolId.slice(0, 8)}...
                         </p>
                       </div>
@@ -292,13 +293,13 @@ export default function StudentViewPage() {
                       size="lg"
                       onClick={handleDonateClick}
                       disabled={isDonating}
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-lg"
+                      className="px-8 py-4 text-lg font-semibold text-white shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                     >
                       <Heart className="w-6 h-6 mr-3" />
                       DONATE NOW
                     </Button>
                   </motion.div>
-                  <p className="text-sm text-gray-600 text-center lg:text-right max-w-48">
+                  <p className="text-sm text-center text-gray-600 lg:text-right max-w-48">
                     Help {student.Name.split(" ")[0]} achieve their educational dreams
                   </p>
                 </div>
@@ -308,36 +309,36 @@ export default function StudentViewPage() {
         </motion.div>
 
         {/* Additional Information Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Record Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Card className="border-gray-100 h-full">
+            <Card className="h-full border-gray-100">
               <CardHeader>
-                <CardTitle className="text-indigo-600 flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-indigo-600">
                   <Clock className="w-5 h-5" />
                   Record Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Created</h4>
+                  <h4 className="mb-2 font-semibold text-gray-900">Created</h4>
                   <p className="text-gray-600">{createdDate.date}</p>
                   <p className="text-sm text-gray-500">at {createdDate.time}</p>
                 </div>
                 <Separator />
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Last Updated</h4>
+                  <h4 className="mb-2 font-semibold text-gray-900">Last Updated</h4>
                   <p className="text-gray-600">{updatedDate.date}</p>
                   <p className="text-sm text-gray-500">at {updatedDate.time}</p>
                 </div>
                 <Separator />
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Student ID</h4>
-                  <p className="text-sm font-mono text-gray-600 bg-gray-50 p-2 rounded border">{student.Id}</p>
+                  <h4 className="mb-2 font-semibold text-gray-900">Student ID</h4>
+                  <p className="p-2 font-mono text-sm text-gray-600 border rounded bg-gray-50">{student.Id}</p>
                 </div>
               </CardContent>
             </Card>
@@ -349,17 +350,17 @@ export default function StudentViewPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Card className="border-gray-100 h-full">
+            <Card className="h-full border-gray-100">
               <CardHeader>
-                <CardTitle className="text-indigo-600 flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-indigo-600">
                   <Heart className="w-5 h-5" />
                   Sponsorship Impact
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center p-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg">
-                  <div className="text-3xl font-bold text-indigo-600 mb-2">$0</div>
-                  <p className="text-gray-600 mb-4">Total Donations Received</p>
+                <div className="p-6 text-center rounded-lg bg-gradient-to-br from-indigo-50 to-purple-50">
+                  <div className="mb-2 text-3xl font-bold text-indigo-600">$0</div>
+                  <p className="mb-4 text-gray-600">Total Donations Received</p>
                   <div className="text-sm text-gray-500">
                     <p>• Educational materials: $0</p>
                     <p>• School fees: $0</p>
@@ -367,13 +368,13 @@ export default function StudentViewPage() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-600 mb-4">
+                  <p className="mb-4 text-gray-600">
                     Be the first to support {student.Name.split(" ")[0]}'s education journey!
                   </p>
                   <Button
                     variant="outline"
                     onClick={handleDonateClick}
-                    className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-transparent"
+                    className="text-indigo-600 bg-transparent border-indigo-200 hover:bg-indigo-50"
                   >
                     <Heart className="w-4 h-4 mr-2" />
                     Make a Difference
@@ -392,23 +393,23 @@ export default function StudentViewPage() {
         >
           <Card className="border-gray-100">
             <CardHeader>
-              <CardTitle className="text-indigo-600 flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-indigo-600">
                 <GraduationCap className="w-5 h-5" />
                 School Information
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-2">School Name</h4>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="p-4 text-center rounded-lg bg-gray-50">
+                  <h4 className="mb-2 font-semibold text-gray-900">School Name</h4>
                   <p className="text-gray-600">{school?.Name || "Loading..."}</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-2">Location</h4>
+                <div className="p-4 text-center rounded-lg bg-gray-50">
+                  <h4 className="mb-2 font-semibold text-gray-900">Location</h4>
                   <p className="text-gray-600">{school?.District || "Loading..."}</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-2">Program</h4>
+                <div className="p-4 text-center rounded-lg bg-gray-50">
+                  <h4 className="mb-2 font-semibold text-gray-900">Program</h4>
                   <p className="text-gray-600">{school?.Description || "Secondary Education"}</p>
                 </div>
               </div>
@@ -427,11 +428,11 @@ export default function StudentViewPage() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
+          <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="amount" className="text-gray-700">Donation Amount (USD)</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+                <DollarSign className="absolute w-4 h-4 text-gray-500 transform -translate-y-1/2 left-3 top-1/2" />
                 <Input 
                   id="amount" 
                   type="number" 
