@@ -34,8 +34,7 @@ export default function DashboardHeader() {
       </div>
       <div className="flex items-center gap-4">
         <button className="relative p-2 rounded-full hover:bg-gray-100" title="Notifications">
-          <Bell size={20} />
-          <span className="absolute w-2 h-2 bg-red-500 rounded-full top-1 right-1"></span>
+
         </button>
         <div className="relative" ref={profileMenuRef}>
           <button

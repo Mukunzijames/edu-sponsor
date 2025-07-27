@@ -151,44 +151,7 @@ export default function StudentViewPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
-        <div className="max-w-6xl p-6 mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center justify-between"
-          >
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.back()}
-                className="text-indigo-600 hover:bg-indigo-100"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Students
-              </Button>
-              <div className="w-px h-6 bg-gray-300" />
-              <h1 className="text-2xl font-bold text-indigo-600">Student Profile</h1>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="bg-transparent border-gray-200">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm" className="bg-transparent border-gray-200">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <Button variant="outline" size="sm" className="bg-transparent border-gray-200">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      </div>
+
 
       <div className="max-w-6xl p-6 mx-auto space-y-8">
         {/* Student Header Card */}
