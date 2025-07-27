@@ -45,6 +45,13 @@ export const authService = {
       Cookies.set('user_data', JSON.stringify(response.data.userdata), { expires: 7, secure: process.env.NODE_ENV === 'production' });
       console.log('User data set in cookies:', response.data.userdata);
       
+      // Trigger auth refresh event for immediate role detection
+      if (typeof window !== 'undefined') {
+        console.log('🚀 Dispatching auth-refresh event');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('auth-refresh'));
+        }, 100);
+      }
     }
     
     return response.data;
@@ -53,6 +60,14 @@ export const authService = {
   logout: (): void => {
     Cookies.remove('auth_token');
     Cookies.remove('user_data');
+    
+    // Trigger auth refresh event
+    if (typeof window !== 'undefined') {
+      console.log('🚀 Dispatching auth-refresh event on logout');
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('auth-refresh'));
+      }, 100);
+    }
   },
   
   getCurrentUser: (): any => {

@@ -18,8 +18,8 @@ import {
   HandCoins
 } from "lucide-react";
 import { useSidebarState } from "@/hooks/useSidebarState";
+import { useRole } from "@/hooks/useRole";
 import DashboardHeader from "@/components/dashboard/Header";
-import { useAuth } from "@/providers/AuthProvider";
 
 interface SidebarLinkProps {
   href: string;
@@ -51,15 +51,75 @@ const SidebarLink = ({ href, icon, label, isCollapsed }: SidebarLinkProps) => {
   );
 };
 
+// Icon mapping for the navigation items
+const iconMap = {
+  LayoutDashboard: <LayoutDashboard size={20} />,
+  School: <School size={20} />,
+  Users: <Users size={20} />,
+  HandCoins: <HandCoins size={20} />,
+};
+
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const { isCollapsed, toggleSidebar } = useSidebarState();
-  const { user } = useAuth();
-  const userRole = user?.role || "";
-  const isSponsor = userRole === "Sponsor";
+  const { isSponsor, isSchool } = useRole();
+
+  // Define navigation items based on user role
+  const getNavigationItems = () => {
+    if (isSponsor) {
+      return [
+        {
+          href: "/dashboard",
+          icon: <LayoutDashboard size={20} />,
+          label: "Dashboard"
+        },
+        {
+          href: "/dashboard/school",
+          icon: <School size={20} />,
+          label: "School"
+        },
+        {
+          href: "/dashboard/sponsorship",
+          icon: <Users size={20} />,
+          label: "Sponsorship"
+        }
+      ];
+    }
+    
+    if (isSchool) {
+      return [
+        {
+          href: "/dashboard",
+          icon: <LayoutDashboard size={20} />,
+          label: "Dashboard"
+        },
+        {
+          href: "/dashboard/donations",
+          icon: <HandCoins size={20} />,
+          label: "Donations"
+        },
+        {
+          href: "/dashboard/school",
+          icon: <School size={20} />,
+          label: "School"
+        }
+      ];
+    }
+
+    // Default fallback (should not reach here with proper auth)
+    return [
+      {
+        href: "/dashboard",
+        icon: <LayoutDashboard size={20} />,
+        label: "Dashboard"
+      }
+    ];
+  };
+
+  const navigationItems = getNavigationItems();
 
   return (
     <div className="flex h-screen">
@@ -84,66 +144,19 @@ export default function DashboardLayout({
         
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-2">
-          <SidebarLink 
-            href="/dashboard" 
-            icon={<LayoutDashboard size={20} />} 
-            label="Dashboard" 
-            isCollapsed={isCollapsed} 
-          />
-          <SidebarLink 
-            href="/dashboard/donations" 
-            icon={<HandCoins  size={20} />} 
-            label="Donations" 
-            isCollapsed={isCollapsed} 
-          />
-          <SidebarLink 
-            href="/dashboard/school" 
-            icon={<School size={20} />} 
-            label="School" 
-            isCollapsed={isCollapsed} 
-          />
-          <SidebarLink 
-            href="/dashboard/sponsorship" 
-            icon={<Users size={20} />} 
-            label="Sponsorship" 
-            isCollapsed={isCollapsed} 
-          />
-          {isSponsor && (
+          {navigationItems.map((item) => (
             <SidebarLink 
-              href="/dashboard/sponsorship" 
-              icon={<Users size={20} />} 
-              label="Sponsorship" 
+              key={item.href}
+              href={item.href} 
+              icon={item.icon} 
+              label={item.label} 
               isCollapsed={isCollapsed} 
             />
-          )}
-          {!isSponsor && (
-            <SidebarLink 
-              href="/dashboard/analytics" 
-              icon={<BarChart3 size={20} />} 
-              label="Analytics" 
-              isCollapsed={isCollapsed} 
-            />
-          )}
-          {!isSponsor && (
-            <SidebarLink 
-              href="/dashboard/payments" 
-              icon={<CreditCard size={20} />} 
-              label="Payments" 
-              isCollapsed={isCollapsed} 
-            />
-          )}
+          ))}
         </nav>
         
         {/* Footer */}
         <div className="px-3 py-4 space-y-2 border-t border-gray-200">
-          {!isSponsor && (
-            <SidebarLink 
-              href="/dashboard/support" 
-              icon={<HelpCircle size={20} />} 
-              label="Support" 
-              isCollapsed={isCollapsed} 
-            />
-          )}
           <SidebarLink 
             href="/dashboard/settings" 
             icon={<Settings size={20} />} 

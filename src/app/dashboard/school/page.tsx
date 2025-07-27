@@ -1,22 +1,54 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSchools } from '@/hooks/useSchools'
 import { School } from '@/services/schoolService'
 import { useRouter } from 'next/navigation'
+import { AddSchoolForm } from '@/components/forms/AddSchoolForm'
+import { useRole } from '@/hooks/useRole'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import {
+  Search,
+  MapPin,
+  Users,
+  BookOpen,
+  Star,
+  Heart,
+  TrendingUp,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  GraduationCap,
+  Building,
+  Award,
+  AlertTriangle
+} from 'lucide-react'
 
 function SchoolsPage() {
   const router = useRouter()
   const [currentPage, setCurrentPage] = useState(1)
   const [sortBy, setSortBy] = useState('Newest')
   const [searchQuery, setSearchQuery] = useState('')
+  const { isSponsor, isSchool } = useRole()
   
   // Fetch schools using React Query
-  const { data: schools = [], isLoading, error } = useSchools()
+  const { data: schools = [], isLoading, error, refetch } = useSchools()
   
-  // Handle donate button click to navigate to students page
-  const handleDonateClick = (schoolId: string) => {
+  // Handle donate/view button click
+  const handleSchoolClick = (schoolId: string) => {
     router.push(`/dashboard/student?schoolId=${schoolId}`)
+  }
+
+  // Handle school added callback
+  const handleSchoolAdded = () => {
+    refetch(); // Refresh the schools list
   }
   
   // Apply filtering and sorting
@@ -58,210 +90,361 @@ function SchoolsPage() {
     setCurrentPage(page)
   }
 
-  const renderPaginationButtons = () => {
-    const buttons = []
-    const maxVisiblePages = 5
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+  // Generate school avatar initials
+  const getSchoolInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
 
-    // Adjust startPage if we're near the end
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1)
-    }
-
-    // Previous button
-    buttons.push(
-      <button
-        key="prev"
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        title="Previous Page"
-        className="px-3 py-2 mx-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-    )
-
-    // Page numbers
-    for (let i = startPage; i <= endPage; i++) {
-      buttons.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`px-3 py-2 mx-1 rounded ${
-            i === currentPage
-              ? 'bg-blue-500 text-white'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          {i}
-        </button>
-      )
-    }
-
-    // Show ellipsis and last page if needed
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        buttons.push(
-          <span key="ellipsis" className="px-3 py-2 mx-1 text-gray-500">
-            ...
-          </span>
-        )
-      }
-      buttons.push(
-        <button
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-          className="px-3 py-2 mx-1 text-gray-600 rounded hover:bg-gray-100"
-        >
-          {totalPages}
-        </button>
-      )
-    }
-
-    // Next button
-    buttons.push(
-      <button
-        key="next"
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-3 py-2 mx-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    )
-
-    return buttons
+  // Generate consistent color for school avatar
+  const getSchoolColor = (name: string) => {
+    const colors = [
+      'bg-gradient-to-br from-blue-400 to-blue-600',
+      'bg-gradient-to-br from-green-400 to-green-600',
+      'bg-gradient-to-br from-purple-400 to-purple-600',
+      'bg-gradient-to-br from-pink-400 to-pink-600',
+      'bg-gradient-to-br from-indigo-400 to-indigo-600',
+      'bg-gradient-to-br from-red-400 to-red-600',
+      'bg-gradient-to-br from-yellow-400 to-yellow-600',
+      'bg-gradient-to-br from-teal-400 to-teal-600',
+    ]
+    const index = name.length % colors.length
+    return colors[index]
   }
 
   return (
-    <div className="p-6 mx-auto max-w-7xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Schools</h1>
-        <div className="flex items-center space-x-4">
-          <button className="font-medium text-blue-600 hover:text-blue-800">
-            View All →
-          </button>
-        </div>
-      </div>
-
-      {/* Sort and Search */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <div className="absolute left-3 top-2.5 text-gray-400">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Sort by:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="Newest">Newest</option>
-            <option value="Oldest">Oldest</option>
-            <option value="Name">Name</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Loading and Error States */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-12 h-12 border-b-2 border-blue-500 rounded-full animate-spin"></div>
-        </div>
-      )}
-      
-      {error && (
-        <div className="relative px-4 py-3 mb-6 text-red-700 border border-red-200 rounded bg-red-50" role="alert">
-          <strong className="font-bold">Error: </strong>
-          <span className="block sm:inline">{(error as Error).message}</span>
-        </div>
-      )}
-
-      {/* School Cards Grid */}
-      {!isLoading && !error && (
-        <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-          {currentSchools.length > 0 ? (
-            currentSchools.map((school) => (
-              <div key={school.Id} className="overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md hover:shadow-lg">
-                {/* School Image Placeholder */}
-                <div className="relative h-48 bg-gray-200">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-4xl text-gray-400">🏫</div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Enhanced Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl opacity-5"></div>
+          <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-blue-100 shadow-xl">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-blue-100 rounded-2xl">
+                    <Building className="w-10 h-10 text-blue-600" />
                   </div>
-                  {/* Bookmark icon */}
-                  <div className="absolute top-3 right-3">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="text-gray-400 cursor-pointer hover:text-blue-500">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                    </svg>
+                  <div>
+                    <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                      Schools Directory
+                    </h1>
+                    <p className="text-gray-600 text-lg mt-2">
+                      Discover amazing educational institutions making a difference
+                    </p>
                   </div>
-                </div>
-                
-                {/* School Info */}
-                <div className="p-4">
-                  <h3 className="mb-2 font-semibold text-gray-900">{school.Name}</h3>
-                  <p className="mb-4 text-sm text-gray-600 line-clamp-2">{school.Description || 'No description available'}</p>
-                  
-                  {/* District if available */}
-                  {school.District && (
-                    <div className="flex items-center mb-4 text-sm text-gray-500">
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span>{school.District}</span>
-                    </div>
-                  )}
-                  
-                  {/* Donate Button */}
-                  <button 
-                    onClick={() => handleDonateClick(school.Id)}
-                    className="w-full px-4 py-2 font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
-                  >
-                    Donate
-                  </button>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="col-span-4 py-10 text-center text-gray-500">
-              No schools found
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {!isLoading && !error && filteredSchools.length > 0 && (
-        <>
-          <div className="flex items-center justify-center space-x-2">
-            <div className="flex items-center">
-              {renderPaginationButtons()}
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <AddSchoolForm onSchoolAdded={handleSchoolAdded} />
+              </div>
             </div>
           </div>
+        </motion.div>
 
-          {/* Results info */}
-          <div className="mt-4 text-sm text-center text-gray-500">
-            Showing {filteredSchools.length > 0 ? startIndex + 1 : 0} to {Math.min(startIndex + itemsPerPage, filteredSchools.length)} of {filteredSchools.length} entries
-          </div>
-        </>
-      )}
+        {/* Enhanced Stats Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Building className="w-8 h-8 mr-2" />
+                    <span className="text-3xl font-bold">{schools.length}</span>
+                  </div>
+                  <p className="text-blue-100">Total Schools</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <GraduationCap className="w-8 h-8 mr-2" />
+                    <span className="text-3xl font-bold">{filteredSchools.length}</span>
+                  </div>
+                  <p className="text-blue-100">Available Schools</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Award className="w-8 h-8 mr-2" />
+                    <span className="text-3xl font-bold">
+                      {schools.filter(s => s.Status).length}
+                    </span>
+                  </div>
+                  <p className="text-blue-100">Active Programs</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Enhanced Search and Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
+                <div className="flex items-center gap-2 text-blue-600 font-semibold">
+                  <Filter className="w-5 h-5" />
+                  Search & Filter
+                </div>
+                
+                <div className="flex-1 flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Input
+                      placeholder="Search schools, districts, or programs..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-100 h-12"
+                    />
+                  </div>
+                  
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-full sm:w-[180px] border-blue-200 h-12">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Newest">Newest First</SelectItem>
+                      <SelectItem value="Oldest">Oldest First</SelectItem>
+                      <SelectItem value="Name">Alphabetical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-center py-20"
+          >
+            <div className="text-center space-y-4">
+              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto" />
+              <p className="text-gray-600 text-lg">Loading amazing schools...</p>
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Error State */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 text-red-700">
+                  <div className="p-2 bg-red-100 rounded-full">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Error Loading Schools</h3>
+                    <p className="text-sm">{(error as Error).message}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Enhanced School Cards Grid */}
+        {!isLoading && !error && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <AnimatePresence>
+                {currentSchools.length > 0 ? (
+                  currentSchools.map((school, index) => (
+                    <motion.div
+                      key={school.Id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4, delay: index * 0.1 }}
+                      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                    >
+                      <Card className="h-full border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm overflow-hidden group">
+                        {/* School Avatar Header */}
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="w-16 h-16 border-4 border-white shadow-lg">
+                              <AvatarImage 
+                                src={`/school-avatar-${school.Id}.jpg`} 
+                                alt={school.Name}
+                              />
+                              <AvatarFallback 
+                                className={`text-white font-bold text-lg ${getSchoolColor(school.Name)}`}
+                              >
+                                {getSchoolInitials(school.Name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">
+                                {school.Name}
+                              </h3>
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <MapPin className="w-3 h-3" />
+                                <span className="line-clamp-1">{school.District || 'Location not specified'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        
+                        <CardContent className="pt-0 pb-6 space-y-4">
+                          {/* School Description */}
+                          <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
+                            {school.Description || 'A quality educational institution committed to excellence in learning and student development.'}
+                          </p>
+                          
+                          {/* School Stats */}
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <BookOpen className="w-3 h-3" />
+                              <span>Programs Available</span>
+                            </div>
+                            <Badge 
+                              variant={school.Status ? "default" : "secondary"}
+                              className={school.Status ? "bg-green-100 text-green-700" : ""}
+                            >
+                              {school.Status ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                          
+                          {/* Action Button */}
+                          <Button 
+                            onClick={() => handleSchoolClick(school.Id)}
+                            className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg group-hover:shadow-xl transition-all duration-300"
+                          >
+                            <Heart className="w-4 h-4 mr-2" />
+                            {isSponsor ? 'View Students' : 'Manage School'}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="col-span-full"
+                  >
+                    <Card className="border-0 shadow-lg bg-white/80">
+                      <CardContent className="p-12 text-center">
+                        <div className="space-y-4">
+                          <div className="p-6 bg-blue-100 rounded-full w-24 h-24 mx-auto flex items-center justify-center">
+                            <Building className="w-12 h-12 text-blue-600" />
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900">No Schools Found</h3>
+                          <p className="text-gray-600 max-w-md mx-auto">
+                            {searchQuery 
+                              ? "Try adjusting your search criteria to find more schools."
+                              : "No schools are currently available. Check back soon for updates."}
+                          </p>
+                          {isSchool && !searchQuery && (
+                            <div className="pt-4">
+                              <AddSchoolForm onSchoolAdded={handleSchoolAdded} />
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Enhanced Pagination */}
+        {!isLoading && !error && filteredSchools.length > 0 && totalPages > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-gray-600">
+                    Showing <span className="font-semibold text-blue-600">{startIndex + 1}</span> to{" "}
+                    <span className="font-semibold text-blue-600">{Math.min(startIndex + itemsPerPage, filteredSchools.length)}</span> of{" "}
+                    <span className="font-semibold text-blue-600">{filteredSchools.length}</span> schools
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="border-blue-200 hover:bg-blue-50"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const page = currentPage <= 3 ? i + 1 : currentPage - 2 + i;
+                        if (page > totalPages) return null;
+                        
+                        return (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(page)}
+                            className={
+                              currentPage === page
+                                ? "bg-blue-600 hover:bg-blue-700"
+                                : "border-blue-200 hover:bg-blue-50"
+                            }
+                          >
+                            {page}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="border-blue-200 hover:bg-blue-50"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }
