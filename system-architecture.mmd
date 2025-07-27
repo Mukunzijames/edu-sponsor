@@ -1,0 +1,162 @@
+graph TB
+    %% User Layer
+    subgraph "User Layer"
+        U1[["👥 Sponsors<br/>(Donors)"]]
+        U2[["🎓 Students<br/>(Recipients)"]]
+        U3[["🏫 Schools<br/>(Administrators)"]]
+    end
+
+    %% Frontend Layer
+    subgraph "Frontend - Next.js 15 Application"
+        subgraph "Public Pages"
+            LP["🏠 Landing Page<br/>Features, Testimonials, FAQ"]
+            AUTH["🔐 Auth Pages<br/>Login & Register"]
+        end
+        
+        subgraph "Protected Dashboard"
+            DASH["📊 Dashboard<br/>Overview & Analytics"]
+            SPONSOR["💝 Sponsorship<br/>Management"]
+            DONATE["💰 Donations<br/>Tracking"]
+            STUDENTS["👨‍🎓 Students<br/>Profiles & Search"]
+            PROFILE["⚙️ Profile<br/>Management"]
+            SCHOOLS["🏫 Schools<br/>Directory"]
+        end
+        
+        subgraph "UI Components"
+            UI["🎨 Radix UI Components<br/>Cards, Tables, Forms"]
+            CHARTS["📈 Recharts<br/>Data Visualization"]
+            ANIM["✨ Framer Motion<br/>Animations"]
+        end
+    end
+
+    %% Middleware & Security
+    subgraph "Security & Routing"
+        MW["🛡️ Middleware<br/>Route Protection"]
+        AUTH_GUARD["🚪 Auth Guard<br/>JWT Token Validation"]
+    end
+
+    %% State Management
+    subgraph "State Management"
+        TQ["🔄 TanStack Query<br/>Server State"]
+        CTX["🗃️ Context Providers<br/>AuthProvider, StudentsProvider"]
+        HOOKS["🪝 Custom Hooks<br/>useStudents, useSchools"]
+    end
+
+    %% Services Layer
+    subgraph "Services Layer"
+        API_CLIENT["📡 API Client<br/>Axios with Interceptors"]
+        AUTH_SVC["🔑 Auth Service<br/>Login, Register, Logout"]
+        PAYMENT_SVC["💳 Payment Service<br/>Donations, Sponsorships"]
+        STUDENT_SVC["👨‍🎓 Student Service<br/>CRUD Operations"]
+        SCHOOL_SVC["🏫 School Service<br/>Directory Management"]
+    end
+
+    %% External API
+    subgraph "Backend API"
+        API["🌐 EduSponsor API<br/>https://edu-sponsor-api.onrender.com"]
+        
+        subgraph "API Endpoints"
+            AUTH_EP["/api/auth<br/>Authentication"]
+            SPONSOR_EP["/api/sponsorships<br/>Sponsor Management"]
+            DONATE_EP["/api/donations<br/>Payment Processing"]
+            STUDENT_EP["/api/students<br/>Student CRUD"]
+            SCHOOL_EP["/api/schools<br/>School Management"]
+        end
+    end
+
+    %% Database Layer
+    subgraph "Database Layer"
+        NEON[("🗄️ Neon Database<br/>(PostgreSQL)")]
+        DRIZZLE["⚡ Drizzle ORM<br/>Type-safe Database Access"]
+        
+        subgraph "Database Tables"
+            USERS["👤 Users<br/>(Students & Sponsors)"]
+            SPONSORSHIPS["🤝 Sponsorships<br/>(Matching Records)"]
+            DONATIONS["💰 Donations<br/>(Payment History)"]
+            SCHOOLS_DB["🏫 Schools<br/>(Directory)"]
+        end
+    end
+
+    %% External Services
+    subgraph "External Services"
+        HOSTING["☁️ Vercel<br/>Frontend Hosting"]
+        API_HOST["🚀 Render<br/>API Hosting"]
+        STORAGE["💾 Neon<br/>Database Hosting"]
+    end
+
+    %% Data Flow Connections
+    U1 --> LP
+    U2 --> LP
+    U3 --> LP
+    
+    LP --> AUTH
+    AUTH --> MW
+    MW --> AUTH_GUARD
+    AUTH_GUARD --> DASH
+    
+    DASH --> SPONSOR
+    DASH --> DONATE
+    DASH --> STUDENTS
+    DASH --> PROFILE
+    DASH --> SCHOOLS
+    
+    SPONSOR --> UI
+    DONATE --> CHARTS
+    STUDENTS --> UI
+    
+    AUTH_GUARD --> CTX
+    CTX --> TQ
+    TQ --> HOOKS
+    
+    HOOKS --> API_CLIENT
+    API_CLIENT --> AUTH_SVC
+    API_CLIENT --> PAYMENT_SVC
+    API_CLIENT --> STUDENT_SVC
+    API_CLIENT --> SCHOOL_SVC
+    
+    AUTH_SVC --> API
+    PAYMENT_SVC --> API
+    STUDENT_SVC --> API
+    SCHOOL_SVC --> API
+    
+    API --> AUTH_EP
+    API --> SPONSOR_EP
+    API --> DONATE_EP
+    API --> STUDENT_EP
+    API --> SCHOOL_EP
+    
+    AUTH_EP --> DRIZZLE
+    SPONSOR_EP --> DRIZZLE
+    DONATE_EP --> DRIZZLE
+    STUDENT_EP --> DRIZZLE
+    SCHOOL_EP --> DRIZZLE
+    
+    DRIZZLE --> NEON
+    NEON --> USERS
+    NEON --> SPONSORSHIPS
+    NEON --> DONATIONS
+    NEON --> SCHOOLS_DB
+    
+    %% Deployment Connections
+    LP -.-> HOSTING
+    API -.-> API_HOST
+    NEON -.-> STORAGE
+
+    %% Styling
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef frontendClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef securityClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef stateClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef serviceClass fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    classDef apiClass fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef dbClass fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef externalClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+
+    class U1,U2,U3 userClass
+    class LP,AUTH,DASH,SPONSOR,DONATE,STUDENTS,PROFILE,SCHOOLS,UI,CHARTS,ANIM frontendClass
+    class MW,AUTH_GUARD securityClass
+    class TQ,CTX,HOOKS stateClass
+    class API_CLIENT,AUTH_SVC,PAYMENT_SVC,STUDENT_SVC,SCHOOL_SVC serviceClass
+    class API,AUTH_EP,SPONSOR_EP,DONATE_EP,STUDENT_EP,SCHOOL_EP apiClass
+    class NEON,DRIZZLE,USERS,SPONSORSHIPS,DONATIONS,SCHOOLS_DB dbClass
+    class HOSTING,API_HOST,STORAGE externalClass

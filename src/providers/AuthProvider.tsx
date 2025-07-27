@@ -22,6 +22,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuthStatus = () => {
     try {
       const currentUser = authService.getCurrentUser();
+      console.log("Current User......................:", currentUser);
+      // console.log("Token:", token);
+  
       const token = authService.getToken();
       
       if (currentUser && token) {
