@@ -212,7 +212,9 @@ export default function StudentViewPage() {
                   </Avatar>
                   <h2 className="mb-2 text-3xl font-bold text-indigo-600">{student.Name}</h2>
                   <p className="mb-4 text-gray-600">{school?.Name || "Loading school..."}</p>
-                  <Badge className="mb-6 text-green-700 bg-green-100 border-green-200">{student.Status || "Active Student"}</Badge>
+                  <Badge className="mb-6 text-green-700 bg-green-100 border-green-200">
+                    {student.Status || "Active"}
+                  </Badge>
                 </div>
 
                 {/* Student Details Grid */}
@@ -398,19 +400,48 @@ export default function StudentViewPage() {
                 School Information
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                <div className="p-4 text-center rounded-lg bg-gray-50">
-                  <h4 className="mb-2 font-semibold text-gray-900">School Name</h4>
-                  <p className="text-gray-600">{school?.Name || "Loading..."}</p>
-                </div>
-                <div className="p-4 text-center rounded-lg bg-gray-50">
+            <CardContent className="space-y-6">
+              {/* School Name and Description */}
+              <div className="p-6 rounded-lg bg-gradient-to-br from-indigo-50 to-purple-50">
+                <h3 className="text-xl font-bold text-indigo-900 mb-2">
+                  {school?.Name || "Loading..."}
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {school?.Description || "A quality educational institution committed to providing excellent learning opportunities for students."}
+                </p>
+              </div>
+              
+              {/* School Details Grid */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="p-4 text-center rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="p-3 bg-blue-100 rounded-full w-fit mx-auto mb-3">
+                    <MapPin className="w-6 h-6 text-blue-600" />
+                  </div>
                   <h4 className="mb-2 font-semibold text-gray-900">Location</h4>
                   <p className="text-gray-600">{school?.District || "Loading..."}</p>
                 </div>
-                <div className="p-4 text-center rounded-lg bg-gray-50">
-                  <h4 className="mb-2 font-semibold text-gray-900">Program</h4>
-                  <p className="text-gray-600">{school?.Description || "Secondary Education"}</p>
+                
+                <div className="p-4 text-center rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="p-3 bg-green-100 rounded-full w-fit mx-auto mb-3">
+                    <GraduationCap className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h4 className="mb-2 font-semibold text-gray-900">School Type</h4>
+                  <p className="text-gray-600">
+                    {school?.Status ? "Active Institution" : "Educational Institution"}
+                  </p>
+                </div>
+              </div>
+
+              {/* School ID for reference */}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">School ID</h4>
+                    <p className="text-sm text-gray-600">Reference identifier for this institution</p>
+                  </div>
+                  <div className="font-mono text-sm text-gray-700 bg-white px-3 py-2 rounded border">
+                    {student.SchoolId.slice(0, 8)}...
+                  </div>
                 </div>
               </div>
             </CardContent>

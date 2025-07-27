@@ -3,465 +3,442 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
+  CalendarDays,
   Users,
   GraduationCap,
-  DollarSign,
   TrendingUp,
-  Calendar,
-  MapPin,
-  Award,
-  Heart,
-  BookOpen,
-  Target,
-} from "lucide-react"
-import {
-  Bar,
-  BarChart,
-  Line,
-  LineChart,
-  Pie,
+  DollarSign,
+  BarChart3,
   PieChart,
-  Cell,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+  Target,
+  Award,
+  BookOpen,
+  MapPin,
+  Phone,
+  Mail,
+  Heart,
+  School,
+  HandCoins,
+  UserCheck,
+  Building
+} from "lucide-react"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { useRole } from "@/hooks/useRole"
+import { triggerAuthRefresh } from "@/lib/auth-utils"
 
-// Mock data
-const overviewStats = [
-  { title: "Total Sponsored", value: "247", change: "+12%", icon: Users, color: "bg-blue-50" },
-  { title: "Active Schools", value: "18", change: "+3", icon: GraduationCap, color: "bg-green-50" },
-  { title: "Total Investment", value: "$124,500", change: "+8.2%", icon: DollarSign, color: "bg-purple-50" },
-  { title: "Success Rate", value: "94%", change: "+2.1%", icon: TrendingUp, color: "bg-orange-50" },
-]
-
-const monthlyData = [
-  { month: "Jan", sponsored: 18, investment: 9500 },
-  { month: "Feb", sponsored: 22, investment: 11200 },
-  { month: "Mar", sponsored: 19, investment: 9800 },
-  { month: "Apr", sponsored: 25, investment: 12800 },
-  { month: "May", sponsored: 28, investment: 14200 },
-  { month: "Jun", sponsored: 24, investment: 12100 },
+// Mock data for sponsor analytics
+const sponsorData = [
+  { name: 'Jan', sponsorships: 18, investment: 9200 },
+  { name: 'Feb', sponsorships: 22, investment: 11000 },
+  { name: 'Mar', sponsorships: 19, investment: 9800 },
+  { name: 'Apr', sponsorships: 25, investment: 12500 },
+  { name: 'May', sponsorships: 28, investment: 14200 },
+  { name: 'Jun', sponsorships: 24, investment: 12000 }
 ]
 
 const schoolsData = [
-  { name: "Lincoln Elementary", students: 45, completion: 92, location: "Downtown" },
-  { name: "Roosevelt High", students: 38, completion: 88, location: "Westside" },
-  { name: "Washington Middle", students: 32, completion: 95, location: "Eastside" },
-  { name: "Jefferson Academy", students: 28, completion: 90, location: "Northside" },
-  { name: "Madison Charter", students: 24, completion: 87, location: "Southside" },
+  { name: "Kigali Primary School", location: "Kigali, Rwanda", students: 45, donations: "$8,200" },
+  { name: "Hope Secondary School", location: "Butare, Rwanda", students: 32, donations: "$6,400" },
+  { name: "Future Leaders Academy", location: "Musanze, Rwanda", students: 28, donations: "$5,600" },
+  { name: "Unity High School", location: "Huye, Rwanda", students: 38, donations: "$7,200" }
 ]
 
-const recentSponsored = [
-  {
-    name: "Sarah Johnson",
-    school: "Lincoln Elementary",
-    grade: "5th",
-    duration: "2 years",
-    status: "Active",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    name: "Michael Chen",
-    school: "Roosevelt High",
-    grade: "11th",
-    duration: "1 year",
-    status: "Active",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    name: "Emily Rodriguez",
-    school: "Washington Middle",
-    grade: "7th",
-    duration: "3 years",
-    status: "Graduated",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    name: "David Thompson",
-    school: "Jefferson Academy",
-    grade: "9th",
-    duration: "1.5 years",
-    status: "Active",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    name: "Lisa Wang",
-    school: "Madison Charter",
-    grade: "6th",
-    duration: "2.5 years",
-    status: "Active",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
+// Mock data for school analytics
+const schoolData = [
+  { name: 'Jan', donations: 5200, students: 45 },
+  { name: 'Feb', donations: 6100, students: 48 },
+  { name: 'Mar', donations: 5800, students: 47 },
+  { name: 'Apr', donations: 7200, students: 52 },
+  { name: 'May', donations: 8100, students: 55 },
+  { name: 'Jun', donations: 7600, students: 54 }
 ]
 
-const categoryData = [
-  { name: "Elementary", value: 35, color: "#3B82F6" },
-  { name: "Middle School", value: 28, color: "#8B5CF6" },
-  { name: "High School", value: 37, color: "#10B981" },
+const donorData = [
+  { name: "James Sponsor", amount: 2500, students: 5, lastDonation: "2 days ago" },
+  { name: "Sarah Foundation", amount: 3200, students: 8, lastDonation: "1 week ago" },
+  { name: "Global Education Fund", amount: 1800, students: 3, lastDonation: "3 days ago" },
+  { name: "Hope Charity", amount: 2100, students: 4, lastDonation: "5 days ago" }
 ]
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-}
+// Sponsor Dashboard Component
+const SponsorDashboard = () => (
+  <div className="min-h-screen bg-white p-6">
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div>
+          <h1 className="text-3xl font-bold text-indigo-600">Sponsor Analytics</h1>
+          <p className="text-gray-600 mt-1">Track your impact and sponsorship performance</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" className="flex items-center gap-2">
+            <CalendarDays className="w-4 h-4" />
+            Last 6 Months
+          </Button>
+          <Button className="bg-indigo-600 hover:bg-indigo-700">
+            <BarChart3 className="w-4 h-4 mr-2" />
+            View Report
+          </Button>
+        </div>
+      </motion.div>
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <Card className="border-indigo-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Total Sponsored</CardTitle>
+              <Users className="h-4 w-4 text-indigo-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-indigo-600">247</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +12%
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-export default function SponsorAnalytics() {
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Card className="border-green-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Active Schools</CardTitle>
+              <School className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">18</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +3
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card className="border-blue-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Total Investment</CardTitle>
+              <DollarSign className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">$124,500</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +8.2%
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <Card className="border-purple-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Success Rate</CardTitle>
+              <Target className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">94%</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +2.1%
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-indigo-600 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Monthly Sponsorships
+            </CardTitle>
+            <CardDescription>Number of students sponsored each month</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={sponsorData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="sponsorships" stroke="#4f46e5" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-indigo-600 flex items-center gap-2">
+              <PieChart className="w-5 h-5" />
+              Investment Trends
+            </CardTitle>
+            <CardDescription>Monthly investment amounts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={sponsorData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="investment" fill="#8b5cf6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </div>
+)
+
+// School Dashboard Component
+const SchoolDashboard = () => (
+  <div className="min-h-screen bg-white p-6">
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div>
+          <h1 className="text-3xl font-bold text-green-600">School Dashboard</h1>
+          <p className="text-gray-600 mt-1">Monitor donations and student progress</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" className="flex items-center gap-2">
+            <CalendarDays className="w-4 h-4" />
+            Last 6 Months
+          </Button>
+          <Button className="bg-green-600 hover:bg-green-700">
+            <BarChart3 className="w-4 h-4 mr-2" />
+            View Report
+          </Button>
+        </div>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <Card className="border-green-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Total Students</CardTitle>
+              <GraduationCap className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">324</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +15 this month
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Card className="border-blue-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Active Sponsors</CardTitle>
+              <UserCheck className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">45</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +8 new
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card className="border-purple-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Total Donations</CardTitle>
+              <HandCoins className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">$48,200</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +12%
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <Card className="border-orange-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">Graduation Rate</CardTitle>
+              <Award className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">87%</div>
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                +5%
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-green-600 flex items-center gap-2">
+              <HandCoins className="w-5 h-5" />
+              Monthly Donations
+            </CardTitle>
+            <CardDescription>Donation amounts received each month</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={schoolData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="donations" stroke="#16a34a" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-green-600 flex items-center gap-2">
+              <GraduationCap className="w-5 h-5" />
+              Student Growth
+            </CardTitle>
+            <CardDescription>Number of students over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={schoolData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="students" fill="#059669" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Donors */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-green-600 flex items-center gap-2">
+            <Heart className="w-5 h-5" />
+            Recent Donors
+          </CardTitle>
+          <CardDescription>Latest sponsors and their contributions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {donorData.map((donor, index) => (
+              <motion.div
+                key={donor.name}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <Heart className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-green-600">{donor.name}</h3>
+                    <p className="text-sm text-gray-600">{donor.students} students sponsored</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-gray-900">${donor.amount}</p>
+                  <p className="text-sm text-gray-500">{donor.lastDonation}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+)
+
+// Main Dashboard Component
+export default function Dashboard() {
   const [mounted, setMounted] = useState(false)
+  const { isSponsor, isSchool, userRole } = useRole()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Add debugging and force re-render on role change
+  useEffect(() => {
+    console.log('📊 Dashboard - Role changed:', { isSponsor, isSchool, userRole });
+  }, [isSponsor, isSchool, userRole]);
+
   if (!mounted) return null
 
+  console.log('📊 Dashboard Render - isSponsor:', isSponsor, 'isSchool:', isSchool, 'userRole:', userRole);
+
+  // Render different dashboards based on user role
+  if (isSponsor) {
+    return <SponsorDashboard />
+  }
+
+  if (isSchool) {
+    return <SchoolDashboard />
+  }
+
+  // Fallback for unknown roles - show debugging info
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-        >
-          <div>
-            <h1 className="text-3xl font-bold text-indigo-600">Sponsor Analytics</h1>
-            <p className="text-gray-600 mt-2">Track your impact and sponsorship performance</p>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 bg-transparent">
-              <Calendar className="w-4 h-4 mr-2" />
-              Last 6 Months
-            </Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
-              <Award className="w-4 h-4 mr-2" />
-              View Report
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* Overview Stats */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {overviewStats.map((stat, index) => (
-            <motion.div key={stat.title} variants={item}>
-              <Card className="border-gray-100 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                      <p className="text-2xl font-bold text-indigo-600 mt-2">{stat.value}</p>
-                      <p className="text-sm text-green-600 mt-1 flex items-center">
-                        <TrendingUp className="w-3 h-3 mr-1" />
-                        {stat.change}
-                      </p>
-                    </div>
-                    <div className={`p-3 rounded-full ${stat.color}`}>
-                      <stat.icon className="w-6 h-6 text-indigo-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Charts Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <Tabs defaultValue="trends" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-50">
-              <TabsTrigger value="trends" className="data-[state=active]:bg-white data-[state=active]:text-indigo-600">
-                Trends
-              </TabsTrigger>
-              <TabsTrigger value="schools" className="data-[state=active]:bg-white data-[state=active]:text-indigo-600">
-                Schools
-              </TabsTrigger>
-              <TabsTrigger
-                value="categories"
-                className="data-[state=active]:bg-white data-[state=active]:text-indigo-600"
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-600">Welcome to Dashboard</h1>
+          <p className="text-gray-500 mt-2">Please contact support for role assignment</p>
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg text-left">
+            <h3 className="font-semibold mb-2">Debug Info:</h3>
+            <p>User Role: <strong>{userRole || 'No role detected'}</strong></p>
+            <p>Is Sponsor: <strong>{isSponsor ? 'Yes' : 'No'}</strong></p>
+            <p>Is School: <strong>{isSchool ? 'Yes' : 'No'}</strong></p>
+            <div className="flex gap-2 mt-4">
+              <button 
+                onClick={() => triggerAuthRefresh()} 
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
               >
-                Categories
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="trends" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="border-gray-100">
-                  <CardHeader>
-                    <CardTitle className="text-indigo-600">Monthly Sponsorships</CardTitle>
-                    <CardDescription>Number of students sponsored each month</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer
-                      config={{
-                        sponsored: {
-                          label: "Students Sponsored",
-                          color: "#3B82F6",
-                        },
-                      }}
-                      className="h-[300px]"
-                    >
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={monthlyData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="month" stroke="#6B7280" />
-                          <YAxis stroke="#6B7280" />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Line
-                            type="monotone"
-                            dataKey="sponsored"
-                            stroke="#3B82F6"
-                            strokeWidth={3}
-                            dot={{ fill: "#3B82F6", strokeWidth: 2, r: 6 }}
-                            activeDot={{ r: 8, fill: "#1D4ED8" }}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-gray-100">
-                  <CardHeader>
-                    <CardTitle className="text-indigo-600">Investment Trends</CardTitle>
-                    <CardDescription>Monthly investment amounts</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer
-                      config={{
-                        investment: {
-                          label: "Investment ($)",
-                          color: "#8B5CF6",
-                        },
-                      }}
-                      className="h-[300px]"
-                    >
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={monthlyData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="month" stroke="#6B7280" />
-                          <YAxis stroke="#6B7280" />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="investment" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="schools" className="space-y-6">
-              <Card className="border-gray-100">
-                <CardHeader>
-                  <CardTitle className="text-indigo-600 flex items-center gap-2">
-                    <GraduationCap className="w-5 h-5" />
-                    School Performance
-                  </CardTitle>
-                  <CardDescription>Overview of sponsored students by school</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {schoolsData.map((school, index) => (
-                      <motion.div
-                        key={school.name}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 bg-indigo-100 rounded-full">
-                            <BookOpen className="w-5 h-5 text-indigo-600" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-indigo-600">{school.name}</h3>
-                            <p className="text-sm text-gray-600 flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {school.location}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-indigo-600">{school.students} students</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Progress value={school.completion} className="w-20 h-2" />
-                            <span className="text-sm text-gray-600">{school.completion}%</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="categories" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="border-gray-100">
-                  <CardHeader>
-                    <CardTitle className="text-indigo-600">Students by Grade Level</CardTitle>
-                    <CardDescription>Distribution of sponsored students</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer
-                      config={{
-                        elementary: { label: "Elementary", color: "#3B82F6" },
-                        middle: { label: "Middle School", color: "#8B5CF6" },
-                        high: { label: "High School", color: "#10B981" },
-                      }}
-                      className="h-[300px]"
-                    >
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={categoryData}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={100}
-                            dataKey="value"
-                            label={({ name, value }) => `${name}: ${value}%`}
-                          >
-                            {categoryData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <ChartTooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-gray-100">
-                  <CardHeader>
-                    <CardTitle className="text-indigo-600 flex items-center gap-2">
-                      <Target className="w-5 h-5" />
-                      Impact Metrics
-                    </CardTitle>
-                    <CardDescription>Key performance indicators</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-600">Graduation Rate</span>
-                        <span className="text-sm font-bold text-indigo-600">94%</span>
-                      </div>
-                      <Progress value={94} className="h-2" />
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-600">Academic Improvement</span>
-                        <span className="text-sm font-bold text-indigo-600">87%</span>
-                      </div>
-                      <Progress value={87} className="h-2" />
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-600">Attendance Rate</span>
-                        <span className="text-sm font-bold text-indigo-600">91%</span>
-                      </div>
-                      <Progress value={91} className="h-2" />
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-600">Program Satisfaction</span>
-                        <span className="text-sm font-bold text-indigo-600">96%</span>
-                      </div>
-                      <Progress value={96} className="h-2" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-
-        {/* Recent Sponsored Students */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <Card className="border-gray-100">
-            <CardHeader>
-              <CardTitle className="text-indigo-600 flex items-center gap-2">
-                <Heart className="w-5 h-5" />
-                Recently Sponsored Students
-              </CardTitle>
-              <CardDescription>Latest additions to your sponsorship program</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentSponsored.map((student, index) => (
-                  <motion.div
-                    key={student.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Avatar>
-                        <AvatarImage src={student.avatar || "/placeholder.svg"} alt={student.name} />
-                        <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                          {student.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold text-indigo-600">{student.name}</h3>
-                        <p className="text-sm text-gray-600">
-                          {student.school} • {student.grade} Grade
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge
-                        variant={student.status === "Active" ? "default" : "secondary"}
-                        className={
-                          student.status === "Active" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
-                        }
-                      >
-                        {student.status}
-                      </Badge>
-                      <p className="text-sm text-gray-600 mt-1">{student.duration}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                Refresh Role
+              </button>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Refresh Page
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
